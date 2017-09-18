@@ -46,6 +46,10 @@ docker_build:
 docker_run:
 	docker run -p 8080:80 -it oozz/beautiful-order-documents:latest
 
+docker_clean:
+	docker ps -q -f status=exited | xargs --no-run-if-empty docker rm
+	docker images -q -f dangling=true | xargs --no-run-if-empty docker rmi
+
 docker_push:
 	docker push oozz/beautiful-order-documents
 
@@ -54,4 +58,4 @@ docker_push:
 install_pipenv install_dependencies init init2 \
 test \
 publish \
-docker_build docker_run docker_push 
+docker_build docker_run docker_clean docker_push
