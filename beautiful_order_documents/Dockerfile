@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Order app python dependencies
-RUN pip install pdfkit==0.6.1 flask==0.12.2 epages-rest-python==0.3.0
+RUN pip install pdfkit==0.6.1 flask==0.12.2 epages-rest-python==0.6.0
 
 # Copy order app files
 COPY static /orders/static

@@ -17,7 +17,7 @@ app = Flask(__name__)
 
 API_URL = os.environ.get('EPAGES_API_URL', '')
 ACCESS_TOKEN = os.environ.get('EPAGES_TOKEN', '')
-CLIENT = epages.HTTPClient(API_URL, ACCESS_TOKEN)
+CLIENT = epages.RESTClient(API_URL, ACCESS_TOKEN)
 ORDERS_DB = {}
 ORDERS_FOR_MERCHANT_KEY = API_URL + ACCESS_TOKEN
 
