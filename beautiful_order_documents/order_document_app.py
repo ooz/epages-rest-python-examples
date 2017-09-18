@@ -103,8 +103,8 @@ def root():
         ORDERS_DB[ORDERS_FOR_MERCHANT_KEY] = order_table
         orders = [OrderViewData(order) for order in orders]
         return render_template("orderlist.html", orders=orders, logo=logo_url)
-    except epages.RESTError, e:
-        return unicode(e)
+    except:
+        return unicode('Something went wrong! :(')
 
 # Requires wkhtmltox or wkhtmltopdf installed besides Python's pdfkit
 @app.route('/pdf/<order_id>.pdf')
