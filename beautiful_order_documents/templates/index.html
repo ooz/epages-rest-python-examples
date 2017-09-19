@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Order Document App</title>
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <div class="container pagecontainer">
+      <h1>Beautiful Order Documents ... kind of</h1>
+      {% if installed %}
+      <p>
+        <a href="ui/orderlist">Login to your order list</a>
+      </p>
+      {% else %}
+      <p>
+        Please install the app first!
+      </p>
+      {% endif %}
+    </div>
+  </body>
+</html>

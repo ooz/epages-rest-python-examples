@@ -15,21 +15,20 @@
       <div class="container" style="padding-top:60px"><!-- Adresses -->
         <div class="row">
           <div class="col-xs-6">
-            <h3>Billings Address</h3>
+            <h3>Billing Address</h3>
             {{ order.billing_name }}<br>
             {{ order.billing_street }}<br>
             {{ order.billing_postcode }} {{order.billing_town}}
           </div>
           <div class="col-xs-6">
-            <h3>Shop Address</h3>
+            <h3>Shop</h3>
             {{ order.shop_name }}<br>
-            {{ order.shop_street }}<br>
-            {{ order.shop_postcode }} {{order.shop_town}}
+            {{ order.shop_email }}
           </div>
         </div>
       </div>
       <div class="container"  style="padding-top:60px">
-        <h1>Invoice Nr. {{ order.invoice_number }} for Order Nr. {{ order.order_number }}</h1>
+        <h1>Order Nr. {{ order.order_number }}</h1>
       </div>
       <div class="container">
         {% if order.products %}

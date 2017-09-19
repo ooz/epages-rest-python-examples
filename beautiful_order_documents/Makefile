@@ -40,11 +40,14 @@ test:
 publish:
 	python setup.py publish
 
+# Docker
 docker_build:
 	docker build -t oozz/beautiful-order-documents:latest .
 
 docker_run:
-	docker run -p 8080:80 -it oozz/beautiful-order-documents:latest
+	docker run --env-file ./env.list -p 8080:80 -it oozz/beautiful-order-documents:latest
+
+docker_buildrun: docker_build docker_run
 
 docker_clean:
 	docker ps -q -f status=exited | xargs --no-run-if-empty docker rm
@@ -53,9 +56,12 @@ docker_clean:
 docker_push:
 	docker push oozz/beautiful-order-documents
 
+docker_init_env:
+	cp env.list.template env.list
+
 # Pwny
 .PHONY: clean clean_vscode clean_pypi clean_all \
 install_pipenv install_dependencies init init2 \
 test \
 publish \
-docker_build docker_run docker_clean docker_push
+docker_build docker_run docker_buildrun docker_clean docker_push docker_init_env
