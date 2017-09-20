@@ -1,0 +1,4 @@
+CLIENT_ID=insert-your-client-id-here
+CLIENT_SECRET=insert-your-client-secret-here
+API_URL=use-for-dev-or-private-app-purposes_remove-otherwise
+FLAGS="--beyond"

@@ -47,7 +47,12 @@ docker_build:
 docker_run:
 	docker run --env-file ./env.list -p 8080:80 -it oozz/beautiful-order-documents:latest
 
+docker_run_beyond:
+	docker run --env-file ./env-beyond.list -p 8080:80 -it oozz/beautiful-order-documents:latest
+
 docker_buildrun: docker_build docker_run
+
+docker_buildrun_beyond: docker_build docker_run_beyond
 
 docker_clean:
 	docker ps -q -f status=exited | xargs --no-run-if-empty docker rm
@@ -58,10 +63,13 @@ docker_push:
 
 docker_init_env:
 	cp env.list.template env.list
+	cp env-beyond.list.template env-beyond.list
 
 # Pwny
 .PHONY: clean clean_vscode clean_pypi clean_all \
 install_pipenv install_dependencies init init2 \
 test \
 publish \
-docker_build docker_run docker_buildrun docker_clean docker_push docker_init_env
+docker_build docker_run docker_run_beyond \
+docker_buildrun docker_buildrun_beyond \
+docker_clean docker_push docker_init_env
