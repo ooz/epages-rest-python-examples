@@ -41,15 +41,15 @@ def root():
 @app.route('/ui/orderlist')
 def orderlist():
     try:
-        logo_url = CLIENT.get("").get("logoUrl", "")
-        orders_response = CLIENT.get("/orders")
-        orders = orders_response.get("items", [])
+        logo_url = CLIENT.get('').get('logoUrl', '')
+        orders_response = CLIENT.get('/orders')
+        orders = orders_response.get('items', [])
         order_table = {}
         for order in orders:
-            order_table[order["orderId"]] = order
+            order_table[order['orderId']] = order
         ORDER_DB[ORDERS_FOR_MERCHANT_KEY] = order_table
         orders = [OrderViewData(order, CLIENT) for order in orders]
-        return render_template("orderlist.html", orders=orders, logo=logo_url)
+        return render_template('orderlist.html', orders=orders, logo=logo_url)
     except epages.RESTError, e:
         return \
 u'''<h1>Something went wrong when fetching the order list! :(</h1>
@@ -64,7 +64,7 @@ def pdf(order_id):
     orders_for_merchant = ORDER_DB.get(ORDERS_FOR_MERCHANT_KEY, {})
     if order_id in orders_for_merchant.keys():
         order = orders_for_merchant[order_id]
-        filename = order_id + ".pdf"
+        filename = order_id + '.pdf'
         pdfkit.from_string(OrderExtendedViewData(order, CLIENT).render_pdf(), filename)
         pdffile = open(filename)
         response = Response(pdffile.read(), mimetype='application/pdf')
@@ -89,13 +89,13 @@ def limit_open_proxy_requests():
 
 def is_allowed_request():
     url = request.url_root
-    return ".ngrok.io" in url or \
-           "localhost:8080" in url or \
-           "0.0.0.0:80" in url
+    return '.ngrok.io' in url or \
+           'localhost:8080' in url or \
+           '0.0.0.0:80' in url
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return "<h1>404 File Not Found! :(</h1>", 404
+    return '<h1>404 File Not Found! :(</h1>', 404
 
 
 def init():
