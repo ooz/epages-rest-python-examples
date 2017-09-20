@@ -30,4 +30,4 @@ COPY *.py /app/
 EXPOSE 80
 
 # Run app
-CMD ["python", "/app/order_document_app.py"]
+CMD python /app/order_document_app.py $FLAGS

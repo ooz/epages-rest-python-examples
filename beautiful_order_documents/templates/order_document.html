@@ -8,7 +8,7 @@
   <body>
     <div class="container pagecontainer">
       <div class="container">
-      {% if order.logo_url != "" %}
+      {% if order.logo_url != '' %}
       <img src="{{ order.logo_url }}" alt="Shop logo" />
       {% endif %}
       </div>
@@ -38,7 +38,9 @@
           </thead>
           <tbody>
           {% for product in order.products %}
-          <tr><td><img src="{{ product.icon }}" /> {{ product.name }}</td>
+          <tr><td>
+              {% if product.icon %} <img src="{{ product.icon }}" /> {% endif %} {{ product.name }}
+              </td>
               <td>{{ product.quantity }}</td>
               <td>{{ product.tax }}</td>
               <td>{{ product.price_per_item }}</td>

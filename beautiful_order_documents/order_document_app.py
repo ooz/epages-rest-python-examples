@@ -36,14 +36,14 @@ ORDERS_FOR_MERCHANT_KEY = ''
 
 @app.route('/')
 def root():
-    if has_private_app_credentials():
+    if has_private_app_credentials() or has_byd_credentials():
         return render_template('index.html', installed=True)
     return render_template('index.html', installed=False)
 
 @app.route('/ui/orderlist')
 def orderlist():
     try:
-        logo_url =  get_shop_logo(CLIENT)
+        logo_url = get_shop_logo(CLIENT)
         orders = get_orders(CLIENT)
         ORDER_DB[ORDERS_FOR_MERCHANT_KEY] = orders_to_table(CLIENT, orders)
         orders = get_order_views(CLIENT, orders)
@@ -63,7 +63,11 @@ def pdf(order_id):
     if order_id in orders_for_merchant.keys():
         order = orders_for_merchant[order_id]
         filename = order_id + '.pdf'
-        pdfkit.from_string(get_order_extended_pdf_str(CLIENT, order),
+        html_to_render = get_order_extended_pdf_str(CLIENT, order)
+        print "###order document###"
+        print html_to_render
+        print "###order document###"
+        pdfkit.from_string(html_to_render,
                            filename)
         pdffile = open(filename)
         response = Response(pdffile.read(), mimetype='application/pdf')
@@ -132,6 +136,8 @@ def has_client_credentials():
     return CLIENT_ID != '' and CLIENT_SECRET != ''
 def has_private_app_credentials():
     return API_URL != '' and ACCESS_TOKEN != ''
+def has_byd_credentials():
+    return API_URL != '' and has_client_credentials()
 
 
 if __name__ == '__main__':
