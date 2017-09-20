@@ -4,6 +4,29 @@ import epages
 from flask import render_template
 
 
+def get_orders(client):
+    orders_response = client.get('/orders')
+    return orders_response.get('items', [])
+
+def get_order_views(client, orders):
+    return [OrderViewData(order, client) for order in orders]
+
+def get_order_extended_pdf_str(client, order):
+    return OrderExtendedViewData(order, client).render_pdf()
+
+def get_shop_logo(client):
+    return client.get('').get('logoUrl', '')
+
+def orders_to_table(client, orders):
+    order_table = {}
+    for order in orders:
+        if client.beyond:
+            pass
+        else:
+            order_table[order['orderId']] = order
+    return order_table
+
+
 class OrderViewData(object):
     def __init__(self, order, client):
         super(OrderViewData, self).__init__()

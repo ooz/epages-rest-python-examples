@@ -14,7 +14,11 @@ import epages
 from flask import Flask, render_template, request, Response, abort, escape
 import pdfkit
 
-from dto import OrderViewData, OrderExtendedViewData, ProductViewData
+from dto import get_shop_logo, \
+                get_orders, \
+                get_order_views, \
+                get_order_extended_pdf_str, \
+                orders_to_table
 
 
 app = Flask(__name__)
@@ -28,27 +32,21 @@ SHOP_DB = {}
 CLIENT_DB = {}
 ORDER_DB = {}
 ORDERS_FOR_MERCHANT_KEY = ''
-IS_BEYOND = False
 
 
 @app.route('/')
 def root():
-    if has_private_app_credentials() or \
-       has_beyond_client_credentials():
+    if has_private_app_credentials():
         return render_template('index.html', installed=True)
     return render_template('index.html', installed=False)
 
 @app.route('/ui/orderlist')
 def orderlist():
     try:
-        logo_url = CLIENT.get('').get('logoUrl', '')
-        orders_response = CLIENT.get('/orders')
-        orders = orders_response.get('items', [])
-        order_table = {}
-        for order in orders:
-            order_table[order['orderId']] = order
-        ORDER_DB[ORDERS_FOR_MERCHANT_KEY] = order_table
-        orders = [OrderViewData(order, CLIENT) for order in orders]
+        logo_url =  get_shop_logo(CLIENT)
+        orders = get_orders(CLIENT)
+        ORDER_DB[ORDERS_FOR_MERCHANT_KEY] = orders_to_table(CLIENT, orders)
+        orders = get_order_views(CLIENT, orders)
         return render_template('orderlist.html', orders=orders, logo=logo_url)
     except epages.RESTError, e:
         return \
@@ -65,7 +63,8 @@ def pdf(order_id):
     if order_id in orders_for_merchant.keys():
         order = orders_for_merchant[order_id]
         filename = order_id + '.pdf'
-        pdfkit.from_string(OrderExtendedViewData(order, CLIENT).render_pdf(), filename)
+        pdfkit.from_string(get_order_extended_pdf_str(CLIENT, order),
+                           filename)
         pdffile = open(filename)
         response = Response(pdffile.read(), mimetype='application/pdf')
         pdffile.close()
@@ -108,14 +107,14 @@ def init():
     global CLIENT_DB
     global ORDER_DB
     global ORDERS_FOR_MERCHANT_KEY
-    global IS_BEYOND
+    is_beyond = False
     if '--beyond' in sys.argv:
-        IS_BEYOND = True
+        is_beyond = True
     CLIENT_ID = os.environ.get('CLIENT_ID', '')
     CLIENT_SECRET = os.environ.get('CLIENT_SECRET', '')
     API_URL = os.environ.get('API_URL', '')
     ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN', '')
-    if IS_BEYOND:
+    if is_beyond:
         CLIENT = epages.BYDClient(API_URL, CLIENT_ID, CLIENT_SECRET)
     else:
         CLIENT = epages.RESTClient(API_URL, ACCESS_TOKEN)
@@ -128,14 +127,12 @@ def init():
 
 def has_client_credentials_or_private_app_credentials():
     return has_client_credentials() or \
-           has_private_app_credentials() or \
-           has_beyond_client_credentials()
+           has_private_app_credentials()
 def has_client_credentials():
     return CLIENT_ID != '' and CLIENT_SECRET != ''
 def has_private_app_credentials():
     return API_URL != '' and ACCESS_TOKEN != ''
-def has_beyond_client_credentials():
-    return not IS_BEYOND or has_client_credentials() and API_URL != ''
+
 
 if __name__ == '__main__':
     init()
