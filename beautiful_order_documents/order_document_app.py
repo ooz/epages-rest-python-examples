@@ -64,9 +64,6 @@ def pdf(order_id):
         order = orders_for_merchant[order_id]
         filename = order_id + '.pdf'
         html_to_render = get_order_extended_pdf_str(CLIENT, order)
-        print "###order document###"
-        print html_to_render
-        print "###order document###"
         pdfkit.from_string(html_to_render,
                            filename)
         pdffile = open(filename)
@@ -86,6 +83,7 @@ def limit_open_proxy_requests():
     http://stackoverflow.com/questions/22251038/how-to-limit-flask-dev-server-to-only-one-visiting-ip-address
     '''
     if not is_allowed_request():
+        print "Someone is messing with us:"
         print request.url_root
         print request
         abort(403)

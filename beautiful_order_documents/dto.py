@@ -81,9 +81,6 @@ class OrderViewData(object):
         return u'Order(%s, %s, %s)' % (self.order_number, self.customer, self.grand_total)
 
     def render_pdf(self):
-        print "Order customer:"
-        print self.customer
-        print self.billing_street
         return render_template('order_document.html', order=self)
 
     def _fetch_customer(self, order):
@@ -106,7 +103,6 @@ class BydOrderViewData(OrderViewData):
         super(BydOrderViewData, self).__init__(order, client)
         self.order_number = order.get('orderNumber', '')
         self.pdf_link = '/api/pdfs/%s.pdf' % order.get('_id', '')
-        print self.pdf_link
         grand_total = order.get('grandTotal', {})
         self.grand_total = '%s %s' % (grand_total.get('amount', ''),
                                       grand_total.get('currency', ''))
@@ -117,7 +113,6 @@ class BydOrderViewData(OrderViewData):
         try:
             shop = self.client.get('/shop/shop')
         except epages.RESTError:
-            print "COULD NOT GET SHOP"
             pass
         self.shop_name = escape(shop.get('name', ''))
         self.shop_email = shop.get('address', {}).get('email', '')
@@ -158,8 +153,6 @@ class BydOrderExtendedViewData(BydOrderViewData):
                                          shipping_lineitem_price.get('currency', ''))
         self.products = [BydProductViewData(product) for product \
                                                      in order.get('productLineItems', [])]
-        for product in self.products:
-            print str(product)
 
 class ProductViewData(object):
     def __init__(self, product):
