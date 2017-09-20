@@ -26,7 +26,6 @@ class OrderViewData(object):
         self.billing_postcode = billing_address.get('zipCode', '')
         self.billing_town = billing_address.get('city', '')
 
-
     def __unicode__(self):
         return u'Order(%s, %s, %s)' % (self.order_number, self.customer, self.grand_total)
 
@@ -61,6 +60,7 @@ class OrderExtendedViewData(OrderViewData):
             pass
         line_item_container = order.get('lineItemContainer', {})
         product_line_items = line_item_container.get('productLineItems', [])
+        self.shipping_total = order.get('shippingData', {}).get('price', {}).get('formatted', None)
         self.products = [ProductViewData(product) for product in product_line_items]
 
     def _fetch_self_link(self, order):
@@ -72,10 +72,14 @@ class ProductViewData(object):
     def __init__(self, product):
         super(ProductViewData, self).__init__()
         self.name = product.get('name', '')
-        self.quantity = "1"
-        self.tax = "2"
-        self.price_per_item = "3"
-        self.price_total = "4"
+        self.quantity = product.get('quantity', {}).get('amount', '')
+        self.tax = unicode(product.get('taxClass', {}).get('percentage', '')).replace('.0', '') + ' %'
+        self.price_per_item = product.get('singleItemPrice', {}).get('formatted', '')
+        self.price_total = product.get('lineItemPrice', {}).get('formatted', '')
+        self.icon = None
+        icons = [img for img in product.get('images', []) if img.get('classifier', '') == 'Thumbnail']
+        if icons:
+            self.icon = icons[0].get('url', None)
 
     def __unicode__(self):
         return u'Product()'

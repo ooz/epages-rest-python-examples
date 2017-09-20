@@ -38,8 +38,28 @@
           </thead>
           <tbody>
           {% for product in order.products %}
-          <tr><td>{{ product.name }}</td><td>{{ product.quantity }}</td><td>{{ product.tax }}</td><td>{{ product.price_per_item }}</td><td>{{ product.price_total }}</td></tr>
+          <tr><td><img src="{{ product.icon }}" /> {{ product.name }}</td>
+              <td>{{ product.quantity }}</td>
+              <td>{{ product.tax }}</td>
+              <td>{{ product.price_per_item }}</td>
+              <td>{{ product.price_total }}</td></tr>
           {% endfor %}
+          {% if order.shipping_total %}
+          <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td><b>Shipping Total:</b></td>
+              <td>{{ order.shipping_total }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td><b>Grand Total:</b></td>
+              <td>{{ order.grand_total }}</td>
+          </tr>
           </tbody>
         </table>
         {% endif %}
