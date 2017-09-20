@@ -44,7 +44,7 @@ class OrderViewData(object):
         self.shop_name = shop.get('name', '')
         self.shop_email = shop.get('email', '')
         billing_address = order.get('billingAddress', {})
-        self.billing_name = billing_address.get('firstName', '') + " " + billing_address.get('lastName', '')
+        self.billing_name = billing_address.get('firstName', '') + ' ' + billing_address.get('lastName', '')
         self.billing_street = billing_address.get('street', '')
         self.billing_postcode = billing_address.get('zipCode', '')
         self.billing_town = billing_address.get('city', '')
