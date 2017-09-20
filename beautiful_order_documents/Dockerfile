@@ -19,12 +19,12 @@ RUN chmod a+x /usr/bin/wkhtmltopdf.sh
 RUN ln -s /usr/bin/wkhtmltopdf.sh /usr/local/bin/wkhtmltopdf
 
 # Order app python dependencies
-RUN pip install pdfkit==0.6.1 flask==0.12.2 epages-rest-python==0.6.1
+RUN pip install pdfkit==0.6.1 flask==0.12.2 epages-rest-python==0.7.0
 
 # Copy order app files
 COPY static /app/static
 COPY templates /app/templates
-COPY order_document_app.py /app/
+COPY *.py /app/
 
 # Expose app/HTTP port
 EXPOSE 80

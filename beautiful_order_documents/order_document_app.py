@@ -8,10 +8,13 @@ Description:
 '''
 
 import os
+import sys
 
 import epages
-from flask import Flask, render_template, request, Response, abort
+from flask import Flask, render_template, request, Response, abort, escape
 import pdfkit
+
+from dto import OrderViewData, OrderExtendedViewData, ProductViewData
 
 
 app = Flask(__name__)
@@ -25,87 +28,13 @@ SHOP_DB = {}
 CLIENT_DB = {}
 ORDER_DB = {}
 ORDERS_FOR_MERCHANT_KEY = ''
-
-
-def fetch_self_link(order):
-    links = order.get('links', [])
-    self_link = [link.get('href', '') for link in links if link.get("rel", "") == "self"][0]
-    return self_link
-
-def fetch_customer(order):
-    try:
-        links = order.get("links", [])
-        customer_link = [link.get("href", "") for link in links if link.get("rel", "") == "customer"][0]
-        if customer_link != "":
-            customer = CLIENT.get(customer_link)
-            billing_address = customer.get("billingAddress", {})
-            return "%s %s" % (billing_address.get("firstName", ""), billing_address.get("lastName", ""))
-    except epages.RESTError:
-        pass
-    return ""
-
-class OrderViewData(object):
-    def __init__(self, order):
-        super(OrderViewData, self).__init__()
-        self.order_number = order.get("orderNumber", "")
-        self.pdf_link = "/api/pdfs/%s.pdf" % order.get("orderId", "")
-        self.grand_total = "%s %s" % (order.get("grandTotal", ""), order.get("currencyId", ""))
-        self.customer = fetch_customer(order)
-        shop = {}
-        try:
-            shop = CLIENT.get("")
-        except RESTError:
-            pass
-        self.logo_url = shop.get('logoUrl', '')
-        self.shop_name = shop.get('name', '')
-        self.shop_email = shop.get('email', '')
-        billing_address = order.get('billingAddress', {})
-        self.billing_name = billing_address.get('firstName', '') + " " + billing_address.get('lastName', '')
-        self.billing_street = billing_address.get('street', '')
-        self.billing_postcode = billing_address.get('zipCode', '')
-        self.billing_town = billing_address.get('city', '')
-
-
-    def __unicode__(self):
-        return u"Order(%s, %s, %s)" % (self.order_number, self.customer, self.grand_total)
-
-    def render_pdf(self):
-        return render_template("order_document.html", order=self)
-
-class OrderExtendedViewData(OrderViewData):
-    """
-    Does not just contain the order info, but also all line items.
-    """
-    def __init__(self, order):
-        super(OrderExtendedViewData, self).__init__(order)
-        self_link = fetch_self_link(order)
-        print "Getting selflink: %s" % self_link
-        order = {}
-        try:
-            order = CLIENT.get(self_link)
-        except epages.RESTError, e:
-            print "Error:"
-            print unicode(e)
-        line_item_container = order.get("lineItemContainer", {})
-        product_line_items = line_item_container.get("productLineItems", [])
-        self.products = [ProductViewData(product) for product in product_line_items]
-
-class ProductViewData(object):
-    def __init__(self, product):
-        super(ProductViewData, self).__init__()
-        self.name = product.get('name', '')
-        self.quantity = "1"
-        self.tax = "2"
-        self.price_per_item = "3"
-        self.price_total = "4"
-
-    def __unicode__(self):
-        return u"Product()"
+IS_BEYOND = False
 
 
 @app.route('/')
 def root():
-    if has_private_app_credentials():
+    if has_private_app_credentials() or \
+       has_beyond_client_credentials():
         return render_template('index.html', installed=True)
     return render_template('index.html', installed=False)
 
@@ -119,10 +48,15 @@ def orderlist():
         for order in orders:
             order_table[order["orderId"]] = order
         ORDER_DB[ORDERS_FOR_MERCHANT_KEY] = order_table
-        orders = [OrderViewData(order) for order in orders]
+        orders = [OrderViewData(order, CLIENT) for order in orders]
         return render_template("orderlist.html", orders=orders, logo=logo_url)
-    except:
-        return 'Something went wrong when fetching the order list! :(', 400
+    except epages.RESTError, e:
+        return \
+u'''<h1>Something went wrong when fetching the order list! :(</h1>
+<pre>
+%s
+</pre>
+''' % escape(unicode(e)), 400
 
 # Requires wkhtmltox or wkhtmltopdf installed besides Python's pdfkit
 @app.route('/api/pdfs/<order_id>.pdf')
@@ -131,10 +65,10 @@ def pdf(order_id):
     if order_id in orders_for_merchant.keys():
         order = orders_for_merchant[order_id]
         filename = order_id + ".pdf"
-        pdfkit.from_string(OrderExtendedViewData(order).render_pdf(), filename)
-        pdf = open(filename)
-        response = Response(pdf.read(), mimetype='application/pdf')
-        pdf.close()
+        pdfkit.from_string(OrderExtendedViewData(order, CLIENT).render_pdf(), filename)
+        pdffile = open(filename)
+        response = Response(pdffile.read(), mimetype='application/pdf')
+        pdffile.close()
         os.remove(filename)
         return response
     abort(404)
@@ -174,11 +108,17 @@ def init():
     global CLIENT_DB
     global ORDER_DB
     global ORDERS_FOR_MERCHANT_KEY
+    global IS_BEYOND
+    if '--beyond' in sys.argv:
+        IS_BEYOND = True
     CLIENT_ID = os.environ.get('CLIENT_ID', '')
     CLIENT_SECRET = os.environ.get('CLIENT_SECRET', '')
     API_URL = os.environ.get('API_URL', '')
     ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN', '')
-    CLIENT = epages.RESTClient(API_URL, ACCESS_TOKEN)
+    if IS_BEYOND:
+        CLIENT = epages.BYDClient(API_URL, CLIENT_ID, CLIENT_SECRET)
+    else:
+        CLIENT = epages.RESTClient(API_URL, ACCESS_TOKEN)
     SHOP_DB = {}
     CLIENT_DB = {}
     ORDER_DB = {}
@@ -187,11 +127,15 @@ def init():
         'Please set either CLIENT_ID and CLIENT_SECRET or API_URL and ACCESS_TOKEN as environment variables!'
 
 def has_client_credentials_or_private_app_credentials():
-    return has_client_credentials() or has_private_app_credentials()
+    return has_client_credentials() or \
+           has_private_app_credentials() or \
+           has_beyond_client_credentials()
 def has_client_credentials():
     return CLIENT_ID != '' and CLIENT_SECRET != ''
 def has_private_app_credentials():
     return API_URL != '' and ACCESS_TOKEN != ''
+def has_beyond_client_credentials():
+    return not IS_BEYOND or has_client_credentials() and API_URL != ''
 
 if __name__ == '__main__':
     init()
