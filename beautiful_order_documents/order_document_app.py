@@ -44,6 +44,7 @@ def callback():
     global API_URL
     args = request.args
     ACCESS_TOKEN, API_URL, return_url = epages.get_access_token(CLIENT_ID, CLIENT_SECRET, args)
+    init_client()
     print 'access_token: %s' % ACCESS_TOKEN
     return """<!DOCTYPE html>
 <html>
