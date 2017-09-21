@@ -28,8 +28,6 @@ CLIENT_SECRET = ''
 API_URL = ''
 ACCESS_TOKEN = ''
 CLIENT = None
-SHOP_DB = {}
-CLIENT_DB = {}
 ORDER_DB = {}
 ORDERS_FOR_MERCHANT_KEY = ''
 
@@ -105,10 +103,7 @@ def init():
     global API_URL
     global ACCESS_TOKEN
     global CLIENT
-    global SHOP_DB
-    global CLIENT_DB
     global ORDER_DB
-    global ORDERS_FOR_MERCHANT_KEY
 
     CLIENT_ID = os.environ.get('CLIENT_ID', '')
     CLIENT_SECRET = os.environ.get('CLIENT_SECRET', '')
@@ -117,8 +112,6 @@ def init():
 
     init_client()
 
-    SHOP_DB = {}
-    CLIENT_DB = {}
     ORDER_DB = {}
 
     assert has_client_credentials_or_private_app_credentials(), \
