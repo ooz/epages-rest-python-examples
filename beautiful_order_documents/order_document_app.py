@@ -109,23 +109,29 @@ def init():
     global CLIENT_DB
     global ORDER_DB
     global ORDERS_FOR_MERCHANT_KEY
-    is_beyond = False
-    if '--beyond' in sys.argv:
-        is_beyond = True
+
     CLIENT_ID = os.environ.get('CLIENT_ID', '')
     CLIENT_SECRET = os.environ.get('CLIENT_SECRET', '')
     API_URL = os.environ.get('API_URL', '')
     ACCESS_TOKEN = os.environ.get('ACCESS_TOKEN', '')
-    if is_beyond:
-        CLIENT = epages.BYDClient(API_URL, CLIENT_ID, CLIENT_SECRET)
-    else:
-        CLIENT = epages.RESTClient(API_URL, ACCESS_TOKEN)
+
+    init_client()
+
     SHOP_DB = {}
     CLIENT_DB = {}
     ORDER_DB = {}
-    ORDERS_FOR_MERCHANT_KEY = API_URL + ACCESS_TOKEN
+
     assert has_client_credentials_or_private_app_credentials(), \
         'Please set either CLIENT_ID and CLIENT_SECRET or API_URL and ACCESS_TOKEN as environment variables!'
+
+def init_client():
+    global CLIENT
+    global ORDERS_FOR_MERCHANT_KEY
+    if '--beyond' in sys.argv:
+        CLIENT = epages.BYDClient(API_URL, CLIENT_ID, CLIENT_SECRET)
+    else:
+        CLIENT = epages.RESTClient(API_URL, ACCESS_TOKEN)
+    ORDERS_FOR_MERCHANT_KEY = API_URL + ACCESS_TOKEN
 
 def has_client_credentials_or_private_app_credentials():
     return has_client_credentials() or \
