@@ -38,6 +38,27 @@ def root():
         return render_template('index.html', installed=True)
     return render_template('index.html', installed=False)
 
+@app.route('/callback')
+def callback():
+    global ACCESS_TOKEN
+    global API_URL
+    args = request.args
+    ACCESS_TOKEN, API_URL, return_url = epages.get_access_token(CLIENT_ID, CLIENT_SECRET, args)
+    print 'access_token: %s' % ACCESS_TOKEN
+    return """<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PythonDemo Callback</title>
+</head>
+<body>
+<h1>Callback</h1>
+<p>Thanks for installing PythonDemo App! Hit the "return" link below to return to your MBO/Commerce Cockpit</p>
+<a href="%s">return</a>
+</body>
+</html>
+""" % (return_url)
+
 @app.route('/ui/orderlist')
 def orderlist():
     try:
