@@ -2,8 +2,55 @@
 <html>
   <head>
     <meta charset="UTF-8">
+    <meta name="pdfkit-print-media-type" content="" />
     <title>Order Document</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="print" />
+    <style type="text/css">
+@media print {
+  html, body {
+    width: 210mm;
+    height: 297mm;
+  }
+  @page {
+  size: A4;
+  margin: 0.5cm;
+}
+@page :left {
+  margin: 0.5cm;
+}
+@page :right {
+  margin: 0.8cm;
+}
+@page :first {
+  margin: 1cm 2cm;
+}
+
+  @page:right{
+  @bottom-left {
+    margin: 10pt 0 30pt 0;
+    border-top: .25pt solid #666;
+    content: "My book";
+    font-size: 9pt;
+    color: #333;
+  }
+}
+@page:left{
+  @bottom-left {
+    content: "Page " counter(page) " of " counter(pages);
+  }
+}
+@page:right{
+  @bottom-right {
+    content: counter(page);
+  }
+}
+
+tr {page-break-inside: avoid;}
+td {page-break-inside: avoid;}
+
+}
+
+    </style>
   </head>
   <body>
     <div class="container pagecontainer">

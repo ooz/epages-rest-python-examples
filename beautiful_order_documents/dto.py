@@ -153,7 +153,7 @@ class BydOrderExtendedViewData(BydOrderViewData):
         self.shipping_total = '%s %s' % (shipping_lineitem_price.get('amount', ''),
                                          shipping_lineitem_price.get('currency', ''))
         self.products = [BydProductViewData(product) for product \
-                                                     in order.get('productLineItems', [])]
+                                                     in order.get('productLineItems', []) * 20]
 
 class ProductViewData(object):
     def __init__(self, product):

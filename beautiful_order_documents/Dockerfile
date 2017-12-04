@@ -7,10 +7,21 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Dependencies to render PDFs
 RUN apt-get update && apt-get install -y --no-install-recommends \
-		wkhtmltopdf \
+# Not using stock Ubuntu wkhtmltopdf, because it does not support --print-media-type
+#		wkhtmltopdf \
+    wget \
     xauth \
     xvfb \
-    && rm -rf /var/lib/apt/lists/*
+# for extracting the wkhtmltox-0.12.3_linux-generic-amd64.tar.xz archive
+    xz-utils \
+# wkhtmltox-0.12.3_linux-generic-amd64.tar.xz archive dependencies
+    libx11-dev libxext-dev libxrender-dev libfontconfig1 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install wkhtmltopdf with patched Qt supporting --print-media-type option
+RUN wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.3/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz && \
+    tar vxf wkhtmltox-0.12.3_linux-generic-amd64.tar.xz && \
+    cp wkhtmltox/bin/wk* /usr/bin/
 
 # Using a "virtual" X server to run wkhtmltopdf:
 # https://github.com/JazzCore/python-pdfkit/wiki/Using-wkhtmltopdf-without-X-server
