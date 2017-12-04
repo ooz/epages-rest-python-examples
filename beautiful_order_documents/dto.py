@@ -30,9 +30,9 @@ def get_shop_logo(client):
 def _get_byd_shop_logo(client):
     shop_images = {}
     try:
-        shop_images = client.get('/shop/shop/images')
-    except epages.RESTError:
-        pass
+        shop_images = client.get('/shop/images')
+    except epages.RESTError, error:
+        print unicode(error)
     shop_images = [img for img \
                         in shop_images.get('_embedded', {}).get('images', []) \
                         if img.get('label', '') == 'logo']
@@ -100,7 +100,8 @@ class OrderViewData(object):
 
 class BydOrderViewData(OrderViewData):
     def __init__(self, order, client):
-        super(BydOrderViewData, self).__init__(order, client)
+        #super(BydOrderViewData, self).__init__(order, client)
+        self.client = client
         self.order_number = order.get('orderNumber', '')
         self.pdf_link = '/api/pdfs/%s.pdf' % order.get('_id', '')
         grand_total = order.get('grandTotal', {})
@@ -111,9 +112,9 @@ class BydOrderViewData(OrderViewData):
                                           billing_address.get('lastName', '')))
         shop = {}
         try:
-            shop = self.client.get('/shop/shop')
-        except epages.RESTError:
-            pass
+            shop = self.client.get('/shop')
+        except epages.RESTError, error:
+            print unicode(error)
         self.shop_name = escape(shop.get('name', ''))
         self.shop_email = shop.get('address', {}).get('email', '')
         self.logo_url = _get_byd_shop_logo(self.client)
@@ -133,8 +134,8 @@ class OrderExtendedViewData(OrderViewData):
         order = {}
         try:
             order = self.client.get(self_link)
-        except epages.RESTError:
-            pass
+        except epages.RESTError, error:
+            print unicode(error)
         line_item_container = order.get('lineItemContainer', {})
         product_line_items = line_item_container.get('productLineItems', [])
         self.shipping_total = order.get('shippingData', {}).get('price', {}).get('formatted', None)
