@@ -61,8 +61,6 @@ docker_init_env:
 
 .PHONY: clean clean_vscode clean_pypi clean_all \
 install_pipenv install_dependencies init init2 \
-test \
-publish \
 docker_build docker_run docker_run_beyond \
 docker_buildrun docker_buildrun_beyond \
 docker_clean docker_push docker_init_env
