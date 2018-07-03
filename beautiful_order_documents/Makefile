@@ -32,14 +32,6 @@ init2: install_pipenv
 	pipenv --two
 	make install_dependencies
 
-# Testing
-test:
-	pipenv run pytest
-
-# Publishing to pypi
-publish:
-	python setup.py publish
-
 # Docker
 docker_build:
 	docker build -t oozz/beautiful-order-documents:latest .
@@ -65,7 +57,8 @@ docker_init_env:
 	cp env.list.template env.list
 	cp env-beyond.list.template env-beyond.list
 
-# Pwny
+
+
 .PHONY: clean clean_vscode clean_pypi clean_all \
 install_pipenv install_dependencies init init2 \
 test \
