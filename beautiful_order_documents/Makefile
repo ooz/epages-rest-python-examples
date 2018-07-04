@@ -15,23 +15,6 @@ clean_pypi:
 
 clean_all: clean clean_vscode clean_pypi
 
-# Setup / dependencies
-install_pipenv:
-	pip install pipenv
-
-install_dependencies:
-	pipenv install requests
-	pipenv install six
-	pipenv install --dev pytest
-
-init: install_pipenv
-	pipenv --three
-	make install_dependencies
-
-init2: install_pipenv
-	pipenv --two
-	make install_dependencies
-
 # Docker
 docker_build:
 	docker build -t oozz/beautiful-order-documents:latest .
@@ -60,7 +43,6 @@ docker_init_env:
 
 
 .PHONY: clean clean_vscode clean_pypi clean_all \
-install_pipenv install_dependencies init init2 \
 docker_build docker_run docker_run_beyond \
 docker_buildrun docker_buildrun_beyond \
 docker_clean docker_push docker_init_env
